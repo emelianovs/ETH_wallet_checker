@@ -1,9 +1,10 @@
+from pathlib import Path
 from requests import get
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
-import os
+from credentials import CMC_API_KEY
 
-CMC_API_KEY = os.environ['API_CMC']
+
 
 
 def request_tokens() -> dict:
@@ -41,10 +42,13 @@ def create_token_list(raw_data: dict) -> list:
 
 
 def token_list_to_json():
+    tokens_file_path = Path('tokens.json')
+    if tokens_file_path.exists():
+        return
+
     token_list = create_token_list(request_tokens())
-    jsonized = json.dumps(token_list, indent=4)
-    with open("tokens.json", "w") as write_file:
-        json.dump(jsonized, write_file)
+    with tokens_file_path.open('w') as write_file:
+        json.dump(token_list, write_file)
 
 
 if __name__ == '__main__':

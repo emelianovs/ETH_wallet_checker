@@ -1,11 +1,9 @@
 import json
-import os
 from requests import post
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 from create_token_list import token_list_to_json
+from credentials import WATCH_URL_ETH
 
-API_KEY = os.environ['API_WATCH_ETH']
-URL_ETH = f"https://ethereum.api.watchdata.io/node/jsonrpc?api_key={API_KEY}"
 ETH_ADDRESS = '0x1C727a55eA3c11B0ab7D3a361Fe0F3C47cE6de5d'
 
 
@@ -71,4 +69,4 @@ def runner(api_link: str, eth_address: str) -> list:
 
 if __name__ == '__main__':
     token_list_to_json()
-    print(runner(URL_ETH, ETH_ADDRESS))
+    print(runner(WATCH_URL_ETH, ETH_ADDRESS))
