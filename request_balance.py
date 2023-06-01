@@ -1,22 +1,17 @@
 import json
-from requests import post
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 from create_token_list import token_list_to_json
-from credentials import WATCH_URL_ETH
+from credentials import WD_CFG
+from wd_adapter import BaseWatchDataBlockchainService as WData
 
 ETH_ADDRESS = '0x1C727a55eA3c11B0ab7D3a361Fe0F3C47cE6de5d'
 
 
-def address_eth_balance(url: str, address: str) -> str:
+def address_eth_balance(connection: WData, address: str) -> str:
     try:
-        request_address_balance = post(url, json={
-            "jsonrpc": "2.0",
-            "method": "eth_getBalance",
-            "params": [address, "latest"],
-            "id": 0
-        })
+        request_address_balance = connection.check_eth_balance(address)
 
-        balance_wei = request_address_balance.json().get('result')
+        balance_wei = request_address_balance.get('result')
         balance_eth = round(int(balance_wei, base=16) / 10 ** 18, 8)
 
         return str(balance_eth)
@@ -31,20 +26,16 @@ def parse_dicts(list_of_dicts: list, address_check: str) -> str:
             return i['ticker']
 
 
-def address_token_balance(url: str, address: str) -> list:
+def address_token_balance(connection: WData, address: str) -> list:
     token_balance_list = []
     with open('tokens.json') as jsonfile:
         loaded_json = json.load(jsonfile)
         token_details_list = json.loads(loaded_json)
 
     try:
-        request_token_balance = post(url, json={
-            'jsonrpc': '2.0',
-            'method': 'watch_getTokenBalances',
-            'params': [address, [x['contract'] for x in token_details_list]],
-            'id': 0
-        })
-        tokens = request_token_balance.json().get('result')
+        request_token_balance = connection.check_token_balance(address, token_details_list)
+
+        tokens = request_token_balance.get('result')
         for token in tokens['tokenBalances']:
             balance = round(int(token['tokenBalance'], base=16) / 10 ** 18, 4)
             if balance > 0.0:
@@ -57,11 +48,12 @@ def address_token_balance(url: str, address: str) -> list:
         print(e)
 
 
-def runner(api_link: str, eth_address: str) -> list:
-    token_balances = str(address_token_balance(api_link, eth_address))
+def runner(eth_address: str) -> list:
+    connection_watchdata = WData(WD_CFG)
+    token_balances = str(address_token_balance(connection_watchdata, eth_address))
 
     address_info = ['Address: ' + eth_address,
-                    'ETH balance: ' + address_eth_balance(api_link, eth_address),
+                    'ETH balance: ' + address_eth_balance(connection_watchdata, eth_address),
                     'Token balances: ' + token_balances]
 
     return address_info
@@ -69,4 +61,4 @@ def runner(api_link: str, eth_address: str) -> list:
 
 if __name__ == '__main__':
     token_list_to_json()
-    print(runner(WATCH_URL_ETH, ETH_ADDRESS))
+    print(runner(ETH_ADDRESS))

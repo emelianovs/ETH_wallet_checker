@@ -5,8 +5,6 @@ import json
 from credentials import CMC_API_KEY
 
 
-
-
 def request_tokens() -> dict:
     url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/map'
     parameters = {
