@@ -1,14 +1,15 @@
 import json
+from logger import logger
+
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 from create_token_list import token_list_to_json
 from credentials import WD_CFG
 from wd_adapter import BaseWatchDataBlockchainService as WData
 
-ETH_ADDRESS = '0x1C727a55eA3c11B0ab7D3a361Fe0F3C47cE6de5d'
-
 
 def address_eth_balance(connection: WData, address: str) -> str:
     try:
+        logger.info(msg='Getting ETH balance...')
         request_address_balance = connection.check_eth_balance(address)
 
         balance_wei = request_address_balance.get('result')
@@ -33,6 +34,7 @@ def address_token_balance(connection: WData, address: str) -> list:
         token_details_list = json.loads(loaded_json)
 
     try:
+        logger.info(msg='Getting token balance...')
         request_token_balance = connection.check_token_balance(address, token_details_list)
 
         tokens = request_token_balance.get('result')
@@ -49,9 +51,9 @@ def address_token_balance(connection: WData, address: str) -> list:
 
 
 def runner(eth_address: str) -> list:
+    logger.info(msg='Connecting to WatchData...')
     connection_watchdata = WData(WD_CFG)
     token_balances = str(address_token_balance(connection_watchdata, eth_address))
-
     address_info = ['Address: ' + eth_address,
                     'ETH balance: ' + address_eth_balance(connection_watchdata, eth_address),
                     'Token balances: ' + token_balances]
@@ -61,4 +63,4 @@ def runner(eth_address: str) -> list:
 
 if __name__ == '__main__':
     token_list_to_json()
-    print(runner(ETH_ADDRESS))
+    print(runner('0x1C727a55eA3c11B0ab7D3a361Fe0F3C47cE6de5d'))

@@ -1,8 +1,10 @@
+import json
+
 from pathlib import Path
 from requests import get
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
-import json
 from credentials import CMC_API_KEY
+from logger import logger
 
 
 def request_tokens() -> dict:
@@ -27,6 +29,7 @@ def request_tokens() -> dict:
 
 
 def create_token_list(raw_data: dict) -> list:
+    logger.info('Creating tokens list...')
     tokens_list = []
     for i in raw_data['data']:
         if i['platform'] and i['is_active'] == 1:
