@@ -6,10 +6,13 @@ from request_balance import runner
 bot = telebot.TeleBot(TG_BOT_API)
 
 
-@bot.message_handler(commands=['start', 'hi', 'hello'])
+@bot.message_handler(commands=["start", "hi", "hello"])
 def start_message(message):
-    bot.reply_to(message, 'Hi. Here you can check ETH and token balances of an address on Ethereum network. Please '
-                          'send a valid address.')
+    bot.reply_to(
+        message,
+        "Hi. Here you can check ETH and token balances of an address on Ethereum network. Please "
+        "send a valid address.",
+    )
 
 
 @bot.message_handler()
@@ -21,8 +24,8 @@ def address_validity_check(message):
         bot.reply_to(message, balance[1])
         bot.reply_to(message, balance[2])
     else:
-        bot.reply_to(message, 'Please enter a valid Ethereum network address')
+        bot.reply_to(message, "Please enter a valid Ethereum network address")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bot.infinity_polling()
